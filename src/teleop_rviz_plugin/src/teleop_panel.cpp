@@ -46,12 +46,12 @@ TeleopPanel::TeleopPanel( QWidget* parent )
 
   output_timer->start( 100 );
 
-  velocity_publisher_ = node_->create_publisher<sensor_msgs::msg::Joy>("/joy", 5);
-  attemptable_publisher_ = node_->create_publisher<std_msgs::msg::Bool>("/planning_attemptable", 5);
-  update_publisher_ = node_->create_publisher<std_msgs::msg::Bool>("/update_visibility_graph", 5);
-  reset_publisher_ = node_->create_publisher<std_msgs::msg::Empty>("/reset_visibility_graph", 5);
-  read_publisher_ = node_->create_publisher<std_msgs::msg::String>("/read_file_dir", 5);
-  save_publisher_ = node_->create_publisher<std_msgs::msg::String>("/save_file_dir", 5);
+  velocity_publisher_ = node_->create_publisher<sensor_msgs::msg::Joy>("joy", 5);
+  attemptable_publisher_ = node_->create_publisher<std_msgs::msg::Bool>("planning_attemptable", 5);
+  update_publisher_ = node_->create_publisher<std_msgs::msg::Bool>("update_visibility_graph", 5);
+  reset_publisher_ = node_->create_publisher<std_msgs::msg::Empty>("reset_visibility_graph", 5);
+  read_publisher_ = node_->create_publisher<std_msgs::msg::String>("read_file_dir", 5);
+  save_publisher_ = node_->create_publisher<std_msgs::msg::String>("save_file_dir", 5);
 
 
   drive_widget_->setEnabled( true );

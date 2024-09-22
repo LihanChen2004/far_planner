@@ -59,8 +59,8 @@ void MapHandler::Init(const MapHandlerParams& params) {
     std::fill(terrain_grid_traverse_list_.begin(), terrain_grid_traverse_list_.end(), 0);
 
     INFLATE_N = 1;
-    flat_terrain_cloud_    = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-    kdtree_terrain_clould_ = PointKdTreePtr(new pcl::KdTreeFLANN<PCLPoint>());
+    flat_terrain_cloud_    = std::make_shared<pcl::PointCloud<PCLPoint>>();
+    kdtree_terrain_clould_ = std::make_shared<pcl::KdTreeFLANN<PCLPoint>>();
     kdtree_terrain_clould_->setSortedResults(false);
 }
 
@@ -117,7 +117,7 @@ void MapHandler::GetCloudOfPoint(const Point3D& center,
                 } else if (type == CloudType::OBS_CLOUD) {
                     *cloudOut += *(world_obs_cloud_grid_->GetCell(csub));
                 } else {
-                    if (FARUtil::IsDebug) std::cout << "MH: Assigned cloud type invalid." << std::endl;
+                    if (FARUtil::IsDebug) std::cout << "MH: Assigned cloud type invalid." << '\n';
                     return;
                 }
             }
@@ -136,7 +136,7 @@ void MapHandler::SetMapOrigin(const Point3D& ori_robot_pos) {
     world_obs_cloud_grid_->SetOrigin(pointcloud_grid_origin);
     world_free_cloud_grid_->SetOrigin(pointcloud_grid_origin);
     is_init_ = true;
-    if (FARUtil::IsDebug) std::cout << "MH: Global Cloud Map Grid Initialized." << std::endl;
+    if (FARUtil::IsDebug) std::cout << "MH: Global Cloud Map Grid Initialized." << '\n';
 }
 
 void MapHandler::UpdateRobotPosition(const Point3D& odom_pos) {
@@ -426,7 +426,7 @@ void MapHandler::TraversableAnalysis(const PointCloudPtr& terrainHeightOut) {
                                                                                     FARUtil::robot_pos.y, 0.0f));
     terrainHeightOut->clear();
     if (!terrain_height_grid_->InRange(robot_sub)) {
-        std::cout << "MH: terrain height analysis error: robot position is not in range" << std::endl;
+        std::cout << "MH: terrain height analysis error: robot position is not in range" << '\n';
         return;
     }
     const float H_THRED = map_params_.height_voxel_dim;

@@ -16,20 +16,20 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'graph_topic', 
-            default_value='/planner_nav_graph', 
+            default_value='planner_nav_graph', 
             description='Graph topic to be used'
         ),
 
         Node(
             package='graph_decoder',
             executable='graph_decoder',
-            name='graph_decoder',
             output='screen',
+            namespace='red_standard_robot1',
             parameters=[
                 config
             ],
             remappings=[
-                ('/planner_nav_graph', LaunchConfiguration('graph_topic'))
+                ('planner_nav_graph', LaunchConfiguration('graph_topic'))
             ],
         ),
 

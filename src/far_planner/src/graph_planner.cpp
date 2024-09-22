@@ -21,7 +21,7 @@ void GraphPlanner::Init(const rclcpp::Node::SharedPtr nh, const GraphPlannerPara
     is_goal_init_ = false;
     current_graph_.clear();
     // attemptable planning listener
-    attemptable_sub_ = nh_->create_subscription<std_msgs::msg::Bool>("/planning_attemptable", 5, std::bind(&GraphPlanner::AttemptStatusCallBack, this, std::placeholders::_1));
+    attemptable_sub_ = nh_->create_subscription<std_msgs::msg::Bool>("planning_attemptable", 5, std::bind(&GraphPlanner::AttemptStatusCallBack, this, std::placeholders::_1));
     // initialize terrain grid
     const int col_num = std::ceil(gp_params_.adjust_radius * 2.0f / FARUtil::kLeafSize);
     Eigen::Vector3i grid_size(col_num, col_num, 1);

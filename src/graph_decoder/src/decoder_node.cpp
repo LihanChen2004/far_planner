@@ -19,31 +19,31 @@ void GraphDecoder::Init() {
     // Initializing subscribers and publishers in ROS 2:
     
     graph_sub_ = nh_->create_subscription<visibility_graph_msg::msg::Graph>(
-        "/robot_vgraph", 
+        "robot_vgraph", 
         rclcpp::QoS(5),
         std::bind(&GraphDecoder::GraphCallBack, this, std::placeholders::_1)
     );
 
     graph_pub_ = nh_->create_publisher<visibility_graph_msg::msg::Graph>("decoded_vgraph", rclcpp::QoS(5));
 
-    graph_viz_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>("/graph_decoder_viz", rclcpp::QoS(5));
+    graph_viz_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>("graph_decoder_viz", rclcpp::QoS(5));
 
     this->LoadParmas();
 
     save_graph_sub_ = nh_->create_subscription<std_msgs::msg::String>(
-        "/save_file_dir", 
+        "save_file_dir", 
         rclcpp::QoS(5),
         std::bind(&GraphDecoder::SaveGraphCallBack, this, std::placeholders::_1)
     );
 
     read_graph_sub_ = nh_->create_subscription<std_msgs::msg::String>(
-        "/read_file_dir", 
+        "read_file_dir", 
         rclcpp::QoS(5),
         std::bind(&GraphDecoder::ReadGraphCallBack, this, std::placeholders::_1)
     );
 
     request_graph_service_ = nh_->create_service<std_srvs::srv::Trigger>(
-        "/request_graph_service",
+        "request_graph_service",
         std::bind(&GraphDecoder::RequestGraphService, this, std::placeholders::_1, std::placeholders::_2)
     );
 

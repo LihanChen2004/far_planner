@@ -151,7 +151,7 @@ private:
 
     // Rest of your callback functions...
 
-    inline void ResetGraphCallBack(const std_msgs::msg::Empty::SharedPtr msg) {
+    inline void ResetGraphCallBack(const std_msgs::msg::Empty::SharedPtr  /*msg*/) {
         is_reset_env_ = true;
     }
 
@@ -173,31 +173,31 @@ private:
     }
 
     inline void FakeTerminalInit() {
-        std::cout<<std::endl;
+        std::cout<<'\n';
         if (master_params_.is_static_env) {
-            std::cout<<"\033[1;33m **************** STATIC ENV PLANNING **************** \033[0m\n"<<std::endl;
+            std::cout<<"\033[1;33m **************** STATIC ENV PLANNING **************** \033[0m\n"<<'\n';
         } else {
-            std::cout<< "\033[1;33m **************** DYNAMIC ENV PLANNING **************** \033[0m\n" << std::endl;
+            std::cout<< "\033[1;33m **************** DYNAMIC ENV PLANNING **************** \033[0m\n" << '\n';
         }
-        std::cout<<"\n"<<std::endl;
+        std::cout<<"\n"<<'\n';
         if (!PreconditionCheck()) return;
         printf("\033[A"), printf("\033[A"), printf("\033[2K");
         if (is_graph_init_) {
-            std::cout<< "\033[1;32m V-Graph Initialized \033[0m\n" << std::endl;
-            std::cout<<std::endl<<std::endl;
+            std::cout<< "\033[1;32m V-Graph Initialized \033[0m\n" << '\n';
+            std::cout<<'\n'<<'\n';
         } else {
-            std::cout<< "\033[1;31m V-Graph Resetting...\033[0m\n" << std::endl;
+            std::cout<< "\033[1;31m V-Graph Resetting...\033[0m\n" << '\n';
         }
     }
 
-    inline void ReadFileCommand(const std_msgs::msg::String::SharedPtr msg) {
+    inline void ReadFileCommand(const std_msgs::msg::String::SharedPtr  /*msg*/) {
         if (!FARUtil::IsDebug) { // Terminal Output
             printf("\033[2J"), printf("\033[0;0H"); // cleanup screen
             FakeTerminalInit();
         }
     }
 
-    inline void SaveFileCommand(const std_msgs::msg::String::SharedPtr msg) {
+    inline void SaveFileCommand(const std_msgs::msg::String::SharedPtr  /*msg*/) {
         if (!FARUtil::IsDebug) { // Terminal Output
             printf("\033[2J"), printf("\033[0;0H"); // cleanup screen
             FakeTerminalInit();
@@ -214,11 +214,9 @@ private:
 
     /* define inline functions */
     inline bool PreconditionCheck() {
-        if (is_cloud_init_ && is_odom_init_) {
-            return true;
-        }
-        return false;
+        return is_cloud_init_ && is_odom_init_;
     }
+
     inline void ClearTempMemory() {
         new_vertices_ptr_->clear();
         new_nodes_.clear();

@@ -21,7 +21,6 @@ def generate_launch_description():
         Node(
             package='boundary_handler',
             executable='boundary_handler',
-            name='boundary_handler',
             output='screen',
             parameters=[
                 {'boundary_file': LaunchConfiguration('boundary_file')},
@@ -35,7 +34,6 @@ def generate_launch_description():
         Node(
             package='rviz2',
             executable='rviz2',
-            name='boundary_rviz',
             arguments=['-d', get_package_share_directory('boundary_handler') + '/rviz/default.rviz'],
             respawn=False,
         ),

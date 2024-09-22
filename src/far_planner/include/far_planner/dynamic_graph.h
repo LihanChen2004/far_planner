@@ -96,8 +96,7 @@ private:
 
 
     inline bool IsNodeInTerrainOccupy(const NavNodePtr& node_ptr) {
-        if (!FARUtil::IsStaticEnv && terrain_planner_.IsPointOccupy(node_ptr->position)) return true;
-        return false;
+        return !FARUtil::IsStaticEnv && terrain_planner_.IsPointOccupy(node_ptr->position);
     }
 
     /* Defince inline functions*/
@@ -208,12 +207,8 @@ private:
     }
 
     inline bool IsPolyMatchedForConnect(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2) {
-        if ((node_ptr1->is_finalized && !node_ptr1->is_contour_match && !FARUtil::IsFreeNavNode(node_ptr1)) || 
-            (node_ptr2->is_finalized && !node_ptr2->is_contour_match && !FARUtil::IsFreeNavNode(node_ptr2))) 
-        {
-            return false;
-        }
-        return true;
+        return (!node_ptr1->is_finalized || node_ptr1->is_contour_match || FARUtil::IsFreeNavNode(node_ptr1)) && 
+            (!node_ptr2->is_finalized || node_ptr2->is_contour_match || FARUtil::IsFreeNavNode(node_ptr2));
     }
 
     inline bool IsPolygonEdgeVoteTrue(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2) {
@@ -501,17 +496,11 @@ public:
     static inline bool IsPointOnTerrain(const Point3D& p) {
         bool UNUSE_match = false;
         const float terrain_h = MapHandler::TerrainHeightOfPoint(p, UNUSE_match, true);
-        if (abs(p.z - terrain_h - FARUtil::vehicle_height) < FARUtil::kTolerZ) {
-            return true;
-        }
-        return false;
+        return abs(p.z - terrain_h - FARUtil::vehicle_height) < FARUtil::kTolerZ;
     }
 
     static inline bool IsConvexConnect(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2) {
-        if (node_ptr1->free_direct != NodeFreeDirect::CONCAVE && node_ptr2->free_direct != NodeFreeDirect::CONCAVE) {
-            return true;
-        }
-        return false;
+        return node_ptr1->free_direct != NodeFreeDirect::CONCAVE && node_ptr2->free_direct != NodeFreeDirect::CONCAVE;
     }
 
     static inline void RemoveInvaildTerrainConnect(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2) {
@@ -548,9 +537,9 @@ public:
         node_ptr->is_near_nodes = true;
         node_ptr->is_wide_near = true;
         node_ptr->is_merged = false;
-        node_ptr->is_covered  = (is_odom || is_navpoint || is_goal) ? true : false;
+        node_ptr->is_covered  = is_odom || is_navpoint || is_goal;
         node_ptr->is_frontier = false;
-        node_ptr->is_finalized = is_navpoint ? true : false;
+        node_ptr->is_finalized = is_navpoint;
         node_ptr->is_traversable = is_odom;
         node_ptr->is_navpoint = is_navpoint;
         node_ptr->is_boundary = is_boundary;
@@ -602,7 +591,7 @@ public:
     static inline void ClearGoalNodeInGraph(const NavNodePtr& node_ptr) {
         ClearNodeConnectInGraph(node_ptr);
         //DEBUG
-        if (!node_ptr->contour_connects.empty()) std::cout << "DG: Goal node should not have contour connections." << std::endl;
+        if (!node_ptr->contour_connects.empty()) std::cout << "DG: Goal node should not have contour connections." << '\n';
         FARUtil::EraseNodeFromStack(node_ptr, globalGraphNodes_);
     }
 
@@ -611,7 +600,7 @@ public:
         if (node_ptr != NULL) {
             globalGraphNodes_.push_back(node_ptr);
         } else if (FARUtil::IsDebug) {
-            std::cout << "DG: exist new node pointer is NULL, fails to add into graph" << std::endl;
+            std::cout << "DG: exist new node pointer is NULL, fails to add into graph" << '\n';
         }
     }
 

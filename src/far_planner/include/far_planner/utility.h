@@ -205,10 +205,7 @@ public:
 
     template <typename T>
     static bool IsTypeInStack(const T& elem, const std::vector<T>& T_stack) {
-        if (std::find(T_stack.begin(), T_stack.end(), elem) != T_stack.end()) {
-            return true;
-        }
-        return false;
+        return static_cast<bool>(std::find(T_stack.begin(), T_stack.end(), elem) != T_stack.end());
     }
 
     static void Flat3DPointCloud(const PointCloudPtr& cloudIn, 
@@ -228,8 +225,7 @@ public:
 
     template <typename Point>
     static bool IsPointInToleratedHeight(const Point& p, const float& height=FARUtil::kTolerZ) {
-        if (abs(p.z - FARUtil::robot_pos.z) < height) return true;
-        return false;
+        return static_cast<bool>(abs(p.z - FARUtil::robot_pos.z) < height);
     }
 
     template <typename _T>
@@ -313,17 +309,14 @@ public:
 
     template <typename NodeType1, typename NodeType2>
     static inline bool IsAtSameLayer(const NodeType1& node_ptr1, const NodeType2& node_ptr2) {
-        if (FARUtil::IsMultiLayer && abs(node_ptr1->position.z - node_ptr2->position.z) > FARUtil::kTolerZ) {
-            return false;
-        }
-        return true;
+        return !static_cast<bool>(FARUtil::IsMultiLayer && abs(node_ptr1->position.z - node_ptr2->position.z) > FARUtil::kTolerZ);
     }
 
     template <typename T_vec>
     static Point3D AveragePoints(const T_vec& point_stack) {
         Point3D mean_p(0,0,0);
         if (point_stack.empty()) {
-            std::cout << "FARUtil: Averaging points fails, stack is empty" << std::endl;
+            std::cout << "FARUtil: Averaging points fails, stack is empty" << '\n';
             return mean_p;
         }
         for (const auto& pos : point_stack) {
@@ -378,25 +371,19 @@ public:
     }
 
     static bool IsNodeInExtendMatchRange(const NavNodePtr& node_ptr) {
-        if (FARUtil::IsPointInToleratedHeight(node_ptr->position, FARUtil::kTolerZ * 1.5f) && (node_ptr->position - FARUtil::odom_pos).norm() < FARUtil::kSensorRange) {
-            return true;
-        }
-        return false;
+        return FARUtil::IsPointInToleratedHeight(node_ptr->position, FARUtil::kTolerZ * 1.5f) && (node_ptr->position - FARUtil::odom_pos).norm() < FARUtil::kSensorRange;
     }
 
     static bool IsFreeNavNode(const NavNodePtr& node_ptr) {
-        if (node_ptr->is_odom || node_ptr->is_navpoint) return true;
-        return false;
+        return node_ptr->is_odom || node_ptr->is_navpoint;
     }
 
     static bool IsStaticNode(const NavNodePtr& node_ptr) {
-        if (node_ptr->is_odom || node_ptr->is_goal) return true;
-        return false;
+        return node_ptr->is_odom || node_ptr->is_goal;
     }
 
     static bool IsOutsideGoal(const NavNodePtr& node_ptr) {
-        if (node_ptr->is_goal && !node_ptr->is_navpoint) return true;
-        return false;
+        return node_ptr->is_goal && !node_ptr->is_navpoint;
     }
 
     static float ClampAbsRange(const float& value, float range) {
@@ -411,7 +398,7 @@ public:
         if (norm > FARUtil::kEpsilon) {
             return_p.x /= norm, return_p.y /= norm;
         } else {
-            if (FARUtil::IsDebug) std::cout << "FARUtil: Point XY normalization fails, vector norm is too small." << std::endl;
+            if (FARUtil::IsDebug) std::cout << "FARUtil: Point XY normalization fails, vector norm is too small." << '\n';
         }
         return return_p;
     }
@@ -422,7 +409,7 @@ public:
         int i, j, c = 0;
         int npol = poly.size();
         if (npol < 3) {
-            if (FARUtil::IsDebug) std::cout << "FARUtil: The vertices number of a polygon is less than 3." <<std::endl;
+            if (FARUtil::IsDebug) std::cout << "FARUtil: The vertices number of a polygon is less than 3." <<'\n';
             return false;
         }
         for (i = 0, j = npol-1; i < npol; j = i++) {
@@ -438,10 +425,7 @@ public:
 
     template <typename Point>
     static bool IsConvexPoint(const PolygonPtr& poly_ptr, const Point& ev_p) {
-        if (FARUtil::PointInsideAPoly(poly_ptr->vertices, ev_p) != poly_ptr->is_robot_inside) {
-            return true;
-        } 
-        return false;
+        return static_cast<bool>(FARUtil::PointInsideAPoly(poly_ptr->vertices, ev_p) != poly_ptr->is_robot_inside);
     }
     
 

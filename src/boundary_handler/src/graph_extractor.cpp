@@ -25,8 +25,8 @@ GraphExtractor::GraphExtractor()
 
 void GraphExtractor::Init() {
     /* initialize publisher */
-    graph_viz_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>("/graph_decoder_viz",5);
-    viz_node_pub_  = nh_->create_publisher<visualization_msgs::msg::Marker>("/free_p_viz",5);
+    graph_viz_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>("graph_decoder_viz",5);
+    viz_node_pub_  = nh_->create_publisher<visualization_msgs::msg::Marker>("free_p_viz",5);
     
     this->LoadParmas();
     

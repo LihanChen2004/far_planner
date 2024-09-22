@@ -32,7 +32,7 @@ void FARUtil::RemoveNanInfPoints(const PointCloudPtr& cloudInOut) {
   std::size_t idx = 0;
   for (const auto& p : cloudInOut->points) {
     if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) {
-      if (FARUtil::IsDebug) std::cout << "FARUtil: nan or inf point detected." <<std::endl;
+      if (FARUtil::IsDebug) std::cout << "FARUtil: nan or inf point detected." <<'\n';
       continue;
     }
     temp_cloud.points[idx] = p;
@@ -156,7 +156,7 @@ void FARUtil::TransformPoint3DFrame(const std::string& from_frame_id,
     try {
         tf_buffer->transform(pointIn, pointOut, to_frame_id);
     } catch (tf2::TransformException &ex) {
-        std::cout << "FARUtil: Tracking Point3D TF lookup:" << ex.what() << std::endl;
+        std::cout << "FARUtil: Tracking Point3D TF lookup:" << ex.what() << '\n';
         return;
     }
 
@@ -181,7 +181,7 @@ void FARUtil::ConvertCloudToPCL(const PointStack& point_stack,
   std::size_t i = 0;
   for (const auto& p : point_stack) {
     if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.x)) {
-      if (FARUtil::IsDebug) std::cout << "FARUtil: nan or inf point detected." << std::endl;
+      if (FARUtil::IsDebug) std::cout << "FARUtil: nan or inf point detected." << '\n';
       continue;
     }
     PCLPoint point;
@@ -245,7 +245,7 @@ void FARUtil::ClearKdTree(const PointCloudPtr& cloud_ptr,
 bool FARUtil::IsPointNearNewPoints(const Point3D& p, const bool& is_creation) {
   const int near_c = FARUtil::PointInNewCounter(p, FARUtil::kMatchDist);
   const int counter_limit = is_creation ? std::round(FARUtil::KNewPointC / 2.0f) : FARUtil::KNewPointC;
-  return (near_c > counter_limit) ? true : false;
+  return near_c > counter_limit;
 }
 
 std::size_t FARUtil::PointInXCounter(const Point3D& p,
@@ -296,10 +296,7 @@ void FARUtil::EraseNodeFromStack(const NavNodePtr& node_ptr,
 }
 
 bool FARUtil::IsSamePoint3D(const Point3D& p1, const Point3D& p2) {
-  if ((p2 - p1).norm() < FARUtil::kEpsilon) {
-    return true;
-  }
-  return false;
+  return (p2 - p1).norm() < FARUtil::kEpsilon;
 }
 
 void FARUtil::SetDifference(std::vector<int>& v1, std::vector<int>& v2, std::vector<int>& diff) {
@@ -335,11 +332,8 @@ bool FARUtil::IsOutReducedDirs(const Point3D& diff_p,
   // check second half range
   temp_opposite_dir = -surf_dirs.first;
   in_res_thred = FARUtil::NoiseCosValue(surf_dirs.second * temp_opposite_dir, true, margin_angle_noise);
-  if (norm_dir * surf_dirs.second > in_res_thred &&
-      norm_dir * temp_opposite_dir > in_res_thred) {
-    return true;
-  }
-  return false;
+  return norm_dir * surf_dirs.second > in_res_thred &&
+      norm_dir * temp_opposite_dir > in_res_thred;
 }
 
 bool FARUtil::IsOutReducedDirs(const Point3D& diff_p,
@@ -737,10 +731,7 @@ bool FARUtil::IsInCylinder(const Point3D& from_p, const Point3D& end_p, const Po
   }
   const Point3D vec_axial = unit_axial * proj_scalar;
   temp_line_dist = is_2D ? (vec - vec_axial).norm_flat() : (vec - vec_axial).norm();
-  if (temp_line_dist > radius) {
-      return false;
-  }
-  return true;
+  return temp_line_dist <= radius;
 }
 
 void FARUtil::CreatePointsAroundCenter(const Point3D& center_p, 
@@ -771,10 +762,7 @@ bool FARUtil::IsVoteTrue(const std::deque<int>& votes, const bool& is_balance) {
   const int N = votes.size();
   const float sum = std::accumulate(votes.begin(), votes.end(), 0);
   const float factor = is_balance ? 2.0f : 3.0f;
-  if (sum > std::floor(N / factor)) {
-      return true;
-  }
-  return false;
+  return sum > std::floor(N / factor);
 }
 
 int FARUtil::VoteRankInVotes(const int& c, const std::vector<int>& ordered_votes) {
@@ -799,17 +787,11 @@ bool FARUtil::IsOutReachNode(const NavNodePtr& node_ptr) {
 
 bool FARUtil::IsPointInLocalRange(const Point3D& p, const bool& is_large_h) {
   const float H = is_large_h ? FARUtil::kTolerZ + FARUtil::kHeightVoxel : FARUtil::kTolerZ;
-  if (FARUtil::IsPointInToleratedHeight(p, H) && (p - FARUtil::odom_pos).norm() < FARUtil::kSensorRange) {
-      return true;
-  }
-  return false;
+  return FARUtil::IsPointInToleratedHeight(p, H) && (p - FARUtil::odom_pos).norm() < FARUtil::kSensorRange;
 }
 
 bool FARUtil::IsPointInMarginRange(const Point3D& p) {
-  if (FARUtil::IsPointInToleratedHeight(p, FARUtil::kMarginHeight) && (p - FARUtil::odom_pos).norm() < FARUtil::kMarginDist) {
-      return true;
-  }
-  return false;
+  return FARUtil::IsPointInToleratedHeight(p, FARUtil::kMarginHeight) && (p - FARUtil::odom_pos).norm() < FARUtil::kMarginDist;
 }
 
 float FARUtil::DistanceToLineSeg2D(const Point3D& p, const PointPair& line) {

@@ -82,8 +82,7 @@ bool DynamicGraph::ExtractGraphNodes(const CTNodeStack& new_ctnodes) {
             new_nodes_.push_back(new_node_ptr);
         }
     }
-    if (new_nodes_.empty()) return false;
-    else return true;
+    return !new_nodes_.empty();
 }
 
 void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
@@ -209,16 +208,8 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
         }
         // Analysisig frontier nodes
         for (const auto& node_ptr : near_nav_nodes_) {
-            if (this->IsNodeFullyCovered(node_ptr)) {
-                node_ptr->is_covered = true;
-            } else {
-                node_ptr->is_covered = false;
-            }
-            if (this->IsFrontierNode(node_ptr)) {
-                node_ptr->is_frontier = true;
-            } else {
-                node_ptr->is_frontier = false;
-            }
+            node_ptr->is_covered = this->IsNodeFullyCovered(node_ptr);
+            node_ptr->is_frontier = this->IsFrontierNode(node_ptr);
         }
     }
 }
@@ -478,10 +469,7 @@ bool DynamicGraph::UpdateNodePosition(const NavNodePtr& node_ptr,
     Point3D mean_p = FARUtil::RANSACPoisiton(node_ptr->pos_filter_vec, dg_params_.filter_pos_margin, inlier_size);
     if (node_ptr->pos_filter_vec.size() > 1) mean_p.z = node_ptr->position.z; // keep z value with terrain updates
     node_ptr->position = mean_p;
-    if (int(inlier_size) > dg_params_.finalize_thred) {
-        return true;
-    }
-    return false;
+    return int(inlier_size) > dg_params_.finalize_thred;
 }
 
 void DynamicGraph::InitNodePosition(const NavNodePtr& node_ptr, const Point3D& new_pos) {
@@ -596,7 +584,7 @@ void DynamicGraph::RecordPolygonVote(const NavNodePtr& node_ptr1,
     const auto it2 = node_ptr2->edge_votes.find(node_ptr1->id);
     if (FARUtil::IsDebug) {
         if ((it1 == node_ptr1->edge_votes.end()) != (it2 == node_ptr2->edge_votes.end())) {
-           std::cout << "DG: Critical! Polygon edge votes queue error." << std::endl;
+           std::cout << "DG: Critical! Polygon edge votes queue error." << '\n';
         }
     }
     if (it1 == node_ptr1->edge_votes.end() || it2 == node_ptr2->edge_votes.end()) {
@@ -611,7 +599,7 @@ void DynamicGraph::RecordPolygonVote(const NavNodePtr& node_ptr1,
         }
     } else {
         if (FARUtil::IsDebug) {
-            if (it1->second.size() != it2->second.size()) std::cout << "DG: Polygon edge votes are not equal." << std::endl;
+            if (it1->second.size() != it2->second.size()) std::cout << "DG: Polygon edge votes are not equal." << '\n';
         }
         if (is_reset) it1->second.clear(), it2->second.clear();
         it1->second.push_back(1), it2->second.push_back(1);
@@ -725,7 +713,7 @@ bool DynamicGraph::IsActivateNavNode(const NavNodePtr& node_ptr) {
         return true;
     }
     if (FARUtil::IsFreeNavNode(node_ptr)) {
-        const bool is_nearby = (node_ptr->position - odom_node_ptr_->position).norm() < FARUtil::kNearDist ? true : false;
+        const bool is_nearby = (node_ptr->position - odom_node_ptr_->position).norm() < FARUtil::kNearDist;
         if (is_nearby) {
             node_ptr->is_active = true;
             return true;
@@ -812,10 +800,7 @@ void DynamicGraph::UpdateGlobalNearNodes() {
 bool DynamicGraph::ReEvaluateCorner(const NavNodePtr node_ptr) {
     if (node_ptr->is_boundary) return true;
     if (node_ptr->is_navpoint) {
-        if (FARUtil::IsTypeInStack(node_ptr, surround_internav_nodes_) && this->IsNodeInTerrainOccupy(node_ptr)) {
-            return false;
-        }
-        return true;
+        return !(FARUtil::IsTypeInStack(node_ptr, surround_internav_nodes_) && this->IsNodeInTerrainOccupy(node_ptr));
     }
     const bool is_near_new = FARUtil::IsPointNearNewPoints(node_ptr->position, false);
     if (is_near_new) { // if nearby env changes;
@@ -823,8 +808,7 @@ bool DynamicGraph::ReEvaluateCorner(const NavNodePtr node_ptr) {
         if (!node_ptr->is_contour_match) this->ResetNodeConnectVotes(node_ptr);
     }
     if (!node_ptr->is_contour_match) {
-        if (FARUtil::IsPointInMarginRange(node_ptr->position) || is_near_new) return false;
-        return true;
+        return !(FARUtil::IsPointInMarginRange(node_ptr->position) || is_near_new);
     }
     if (node_ptr->is_finalized) return true;
 
@@ -846,8 +830,5 @@ bool DynamicGraph::ReEvaluateCorner(const NavNodePtr node_ptr) {
 
 bool DynamicGraph::ReEvaluateConnectUsingTerrian(const NavNodePtr& node_ptr1, const NavNodePtr node_ptr2) {
     PointStack terrain_path;
-    if (terrain_planner_.PlanPathFromNodeToNode(node_ptr1, node_ptr2, terrain_path)) {
-        return true;
-    }
-    return false;
+    return terrain_planner_.PlanPathFromNodeToNode(node_ptr1, node_ptr2, terrain_path);
 }

@@ -13,8 +13,8 @@
 void GraphMsger::Init(const rclcpp::Node::SharedPtr nh, const GraphMsgerParams& params) {
     nh_ = nh;
     gm_params_ = params;
-    graph_pub_ = nh_->create_publisher<visibility_graph_msg::msg::Graph>("/robot_vgraph", 5);
-    graph_sub_ = nh_->create_subscription<visibility_graph_msg::msg::Graph>("/decoded_vgraph", 5, std::bind(&GraphMsger::GraphCallBack, this, std::placeholders::_1));
+    graph_pub_ = nh_->create_publisher<visibility_graph_msg::msg::Graph>("robot_vgraph", 5);
+    graph_sub_ = nh_->create_subscription<visibility_graph_msg::msg::Graph>("decoded_vgraph", 5, std::bind(&GraphMsger::GraphCallBack, this, std::placeholders::_1));
 
     global_graph_.clear();
     nodes_cloud_ptr_    = PointCloudPtr(new pcl::PointCloud<PCLPoint>());

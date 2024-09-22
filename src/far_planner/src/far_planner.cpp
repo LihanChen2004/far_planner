@@ -4,8 +4,6 @@
  * fanyang2@andrew.cmu.edu,   
  */
 
-
-
 #include "far_planner/far_planner.h"
 
 /***************************************************************************************/
@@ -23,36 +21,36 @@ FARMaster::FARMaster()
 
 void FARMaster::Init() {
   /* initialize subscriber and publisher */
-  reset_graph_sub_    = nh_->create_subscription<std_msgs::msg::Empty>("/reset_visibility_graph", 5, std::bind(&FARMaster::ResetGraphCallBack, this, std::placeholders::_1));
-  odom_sub_           = nh_->create_subscription<nav_msgs::msg::Odometry>("/odom_world", 5, std::bind(&FARMaster::OdomCallBack, this, std::placeholders::_1));
-  terrain_sub_        = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("/terrain_cloud", 1, std::bind(&FARMaster::TerrainCallBack, this, std::placeholders::_1));
-  scan_sub_           = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("/scan_cloud", 5, std::bind(&FARMaster::ScanCallBack, this, std::placeholders::_1));
-  waypoint_sub_       = nh_->create_subscription<geometry_msgs::msg::PointStamped>("/goal_point", 1, std::bind(&FARMaster::WaypointCallBack, this, std::placeholders::_1));
-  terrain_local_sub_  = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("/terrain_local_cloud", 1, std::bind(&FARMaster::TerrainLocalCallBack, this, std::placeholders::_1));
-  joy_command_sub_    = nh_->create_subscription<sensor_msgs::msg::Joy>("/joy", 5, std::bind(&FARMaster::JoyCommandCallBack, this, std::placeholders::_1));
-  update_command_sub_ = nh_->create_subscription<std_msgs::msg::Bool>("/update_visibility_graph", 5, std::bind(&FARMaster::UpdateCommandCallBack, this, std::placeholders::_1));
-  goal_pub_           = nh_->create_publisher<geometry_msgs::msg::PointStamped>("/way_point",5);
-  boundary_pub_       = nh_->create_publisher<geometry_msgs::msg::PolygonStamped>("/navigation_boundary",5);
+  reset_graph_sub_    = nh_->create_subscription<std_msgs::msg::Empty>("reset_visibility_graph", 5, std::bind(&FARMaster::ResetGraphCallBack, this, std::placeholders::_1));
+  odom_sub_           = nh_->create_subscription<nav_msgs::msg::Odometry>("odometry", 5, std::bind(&FARMaster::OdomCallBack, this, std::placeholders::_1));
+  terrain_sub_        = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("terrain_map_ext", 1, std::bind(&FARMaster::TerrainCallBack, this, std::placeholders::_1));
+  scan_sub_           = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("terrain_map", 5, std::bind(&FARMaster::ScanCallBack, this, std::placeholders::_1));
+  waypoint_sub_       = nh_->create_subscription<geometry_msgs::msg::PointStamped>("goal_point", 1, std::bind(&FARMaster::WaypointCallBack, this, std::placeholders::_1));
+  terrain_local_sub_  = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("registered_scan", 1, std::bind(&FARMaster::TerrainLocalCallBack, this, std::placeholders::_1));
+  joy_command_sub_    = nh_->create_subscription<sensor_msgs::msg::Joy>("joy", 5, std::bind(&FARMaster::JoyCommandCallBack, this, std::placeholders::_1));
+  update_command_sub_ = nh_->create_subscription<std_msgs::msg::Bool>("update_visibility_graph", 5, std::bind(&FARMaster::UpdateCommandCallBack, this, std::placeholders::_1));
+  goal_pub_           = nh_->create_publisher<geometry_msgs::msg::PointStamped>("way_point",5);
+  boundary_pub_       = nh_->create_publisher<geometry_msgs::msg::PolygonStamped>("navigation_boundary",5);
 
   // Timers
-  runtime_pub_        = nh_->create_publisher<std_msgs::msg::Float32>("/runtime",1);
-  planning_time_pub_  = nh_->create_publisher<std_msgs::msg::Float32>("/planning_time",1);
-  traverse_time_pub_  = nh_->create_publisher<std_msgs::msg::Float32>("/far_traverse_time", 5);
+  runtime_pub_        = nh_->create_publisher<std_msgs::msg::Float32>("runtime",1);
+  planning_time_pub_  = nh_->create_publisher<std_msgs::msg::Float32>("planning_time",1);
+  traverse_time_pub_  = nh_->create_publisher<std_msgs::msg::Float32>("far_traverse_time", 5);
 
   // planning status publisher
-  reach_goal_pub_     = nh_->create_publisher<std_msgs::msg::Bool>("/far_reach_goal_status", 5);
+  reach_goal_pub_     = nh_->create_publisher<std_msgs::msg::Bool>("far_reach_goal_status", 5);
 
   // Terminal formatting subscriber
-  read_command_sub_   = nh_->create_subscription<std_msgs::msg::String>("/read_file_dir", 1, std::bind(&FARMaster::ReadFileCommand, this, std::placeholders::_1));
-  save_command_sub_   = nh_->create_subscription<std_msgs::msg::String>("/save_file_dir", 1, std::bind(&FARMaster::SaveFileCommand, this, std::placeholders::_1));
+  read_command_sub_   = nh_->create_subscription<std_msgs::msg::String>("read_file_dir", 1, std::bind(&FARMaster::ReadFileCommand, this, std::placeholders::_1));
+  save_command_sub_   = nh_->create_subscription<std_msgs::msg::String>("save_file_dir", 1, std::bind(&FARMaster::SaveFileCommand, this, std::placeholders::_1));
 
   // DEBUG Publisher
-  dynamic_obs_pub_     = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("/FAR_dynamic_obs_debug",1);
-  surround_free_debug_ = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("/FAR_free_debug",1);
-  surround_obs_debug_  = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("/FAR_obs_debug",1);
-  scan_grid_debug_     = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("/FAR_scanGrid_debug",1);
-  new_PCL_pub_         = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("/FAR_new_debug",1);
-  terrain_height_pub_  = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("/FAR_terrain_height_debug",1);
+  dynamic_obs_pub_     = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("FAR_dynamic_obs_debug",1);
+  surround_free_debug_ = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("FAR_free_debug",1);
+  surround_obs_debug_  = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("FAR_obs_debug",1);
+  scan_grid_debug_     = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("FAR_scanGrid_debug",1);
+  new_PCL_pub_         = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("FAR_new_debug",1);
+  terrain_height_pub_  = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("FAR_terrain_height_debug",1);
 
   //print publisher and subscriber init complete
   // RCLCPP_INFO(nh_->get_logger(), "FAR Planner Subscriber and Publisher Initiated");
@@ -84,7 +82,7 @@ void FARMaster::Init() {
   RCLCPP_INFO(nh_->get_logger(), "FAR Planner Processing Objects Initiated");
 
   /* init internal params */
-  odom_node_ptr_      = NULL;
+  odom_node_ptr_      = nullptr;
   is_cloud_init_      = false;
   is_odom_init_       = false;
   is_scan_init_       = false;
@@ -95,15 +93,15 @@ void FARMaster::Init() {
   is_init_completed_  = false;
 
   // allocate memory to pointers
-  new_vertices_ptr_     = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-  temp_obs_ptr_         = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-  temp_free_ptr_        = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-  temp_cloud_ptr_       = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-  scan_grid_ptr_        = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-  local_terrain_ptr_    = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-  terrain_height_ptr_   = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-  viewpoint_around_ptr_ = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-  kdtree_viewpoint_obs_cloud_ = PointKdTreePtr(new pcl::KdTreeFLANN<PCLPoint>());
+  new_vertices_ptr_     = std::make_shared<pcl::PointCloud<PCLPoint>>();
+  temp_obs_ptr_         = std::make_shared<pcl::PointCloud<PCLPoint>>();
+  temp_free_ptr_        = std::make_shared<pcl::PointCloud<PCLPoint>>();
+  temp_cloud_ptr_       = std::make_shared<pcl::PointCloud<PCLPoint>>();
+  scan_grid_ptr_        = std::make_shared<pcl::PointCloud<PCLPoint>>();
+  local_terrain_ptr_    = std::make_shared<pcl::PointCloud<PCLPoint>>();
+  terrain_height_ptr_   = std::make_shared<pcl::PointCloud<PCLPoint>>();
+  viewpoint_around_ptr_ = std::make_shared<pcl::PointCloud<PCLPoint>>();
+  kdtree_viewpoint_obs_cloud_ = std::make_shared<pcl::KdTreeFLANN<PCLPoint>>();
 
   // set kdtree sorted value
   FARUtil::kdtree_new_cloud_->setSortedResults(false);
@@ -127,13 +125,13 @@ void FARMaster::Init() {
   std::this_thread::sleep_for(std::chrono::seconds(1));
 
   printf("\033[2J"), printf("\033[0;0H"); // cleanup screen
-  std::cout<<std::endl;
+  std::cout<<'\n';
   if (master_params_.is_static_env) {
-    std::cout<<"\033[1;33m **************** STATIC ENV PLANNING **************** \033[0m\n"<<std::endl;
+    std::cout<<"\033[1;33m **************** STATIC ENV PLANNING **************** \033[0m\n"<<'\n';
   } else {
-    std::cout<< "\033[1;33m **************** DYNAMIC ENV PLANNING **************** \033[0m\n" << std::endl;
+    std::cout<< "\033[1;33m **************** DYNAMIC ENV PLANNING **************** \033[0m\n" << '\n';
   }
-  std::cout<<"\n"<<std::endl;
+  std::cout<<"\n"<<'\n';
 
   // init complete
   is_init_completed_ = true;
@@ -144,7 +142,7 @@ void FARMaster::ResetEnvironmentAndGraph() {
   this->ResetInternalValues();
   if (!FARUtil::IsDebug) { // Terminal Output
     printf("\033[A"), printf("\033[A"), printf("\033[2K");
-    std::cout<< "\033[1;31m V-Graph Resetting...\033[0m\n" << std::endl;
+    std::cout<< "\033[1;31m V-Graph Resetting...\033[0m\n" << '\n';
   }
   graph_manager_.ResetCurrentGraph();
   map_handler_.ResetGripMapCloud();
@@ -193,7 +191,7 @@ void FARMaster::MainLoopCallBack() {
   contour_graph_.UpdateContourGraph(odom_node_ptr_, realworld_contour_);
   if (is_graph_init_) {
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<<"Local V-Graph Updated. Number of local vertices: "<<ContourGraph::contour_graph_.size()<<std::endl;
+    std::cout<<"    "<<"Local V-Graph Updated. Number of local vertices: "<<ContourGraph::contour_graph_.size()<<'\n';
   }
   /* Adjust heights with terrain */
   map_handler_.AdjustCTNodeHeight(ContourGraph::contour_graph_);
@@ -215,7 +213,7 @@ void FARMaster::MainLoopCallBack() {
   }
   if (is_graph_init_) {
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<< "Number of new vertices adding to global V-Graph: "<< new_nodes_.size()<<std::endl;
+    std::cout<<"    "<< "Number of new vertices adding to global V-Graph: "<< new_nodes_.size()<<'\n';
   }
   /* Graph Updating */
   graph_manager_.UpdateNavGraph(new_nodes_, is_stop_update_, clear_nodes_);
@@ -228,7 +226,7 @@ void FARMaster::MainLoopCallBack() {
   nav_graph_ = graph_manager_.GetNavGraph();
   if (is_graph_init_) {
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<<"Global V-Graph Updated. Number of global vertices: "<<nav_graph_.size()<<std::endl;
+    std::cout<<"    "<<"Global V-Graph Updated. Number of global vertices: "<<nav_graph_.size()<<'\n';
   }
   contour_graph_.ExtractGlobalContours();      // Global Polygon Update
   graph_planner_.UpdaetVGraph(nav_graph_);     // Graph Planner Update
@@ -254,7 +252,7 @@ void FARMaster::MainLoopCallBack() {
 
   if (is_graph_init_) { 
     if (FARUtil::IsDebug) {
-      std::cout<<" ========================================================== "<<std::endl;
+      std::cout<<" ========================================================== "<<'\n';
     } else { // cleanup outputs in terminal
       for (int i = 0; i < 6; i++) {
         printf("\033[A");
@@ -265,7 +263,7 @@ void FARMaster::MainLoopCallBack() {
   if (!is_graph_init_ && !nav_graph_.empty()) {
     is_graph_init_ = true;
     printf("\033[A"), printf("\033[A"), printf("\033[2K");
-    std::cout<< "\033[1;32m V-Graph Initialized \033[0m\n" << std::endl;
+    std::cout<< "\033[1;32m V-Graph Initialized \033[0m\n" << '\n';
   }
 
 }
@@ -276,10 +274,10 @@ void FARMaster::PlanningCallBack() {
   if (goal_ptr == NULL) {
     /* Graph Traversablity Update */
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<<"Adding Goal to V-Graph "<<"Time: "<<0.f<<"ms"<<std::endl;
+    std::cout<<"    "<<"Adding Goal to V-Graph "<<"Time: "<<0.f<<"ms"<<'\n';
     graph_planner_.UpdateGraphTraverability(odom_node_ptr_, NULL);
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<<"Path Search "<<"Time: "<<0.f<<"ms"<<std::endl;
+    std::cout<<"    "<<"Path Search "<<"Time: "<<0.f<<"ms"<<'\n';
   } else { 
     // Update goal postion with nearby terrain cloud
     const Point3D ori_p = graph_planner_.GetOriginNodePos(true);
@@ -462,7 +460,7 @@ void FARMaster::LoadROSParams() {
   const std::string contour_prefix  = "contour_graph";
   const std::string msger_prefix    = "graph_msger";
 
-   // master params
+  // master params
   nh_->declare_parameter<float>("main_run_freq", 5.0);
   nh_->declare_parameter<float>("voxel_dim", 0.2);
   nh_->declare_parameter<float>("robot_dim", 0.8);
@@ -819,17 +817,17 @@ void FARMaster::WaypointCallBack(const geometry_msgs::msg::PointStamped& route_g
 }
 
 /* allocate static utility PointCloud pointer memory */
-PointCloudPtr  FARUtil::surround_obs_cloud_  = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointCloudPtr  FARUtil::surround_free_cloud_ = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointCloudPtr  FARUtil::stack_new_cloud_     = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointCloudPtr  FARUtil::cur_new_cloud_       = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointCloudPtr  FARUtil::cur_dyobs_cloud_     = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointCloudPtr  FARUtil::stack_dyobs_cloud_   = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointCloudPtr  FARUtil::cur_scan_cloud_      = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointCloudPtr  FARUtil::local_terrain_obs_   = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointCloudPtr  FARUtil::local_terrain_free_  = PointCloudPtr(new pcl::PointCloud<PCLPoint>());
-PointKdTreePtr FARUtil::kdtree_new_cloud_    = PointKdTreePtr(new pcl::KdTreeFLANN<PCLPoint>());
-PointKdTreePtr FARUtil::kdtree_filter_cloud_ = PointKdTreePtr(new pcl::KdTreeFLANN<PCLPoint>());
+PointCloudPtr  FARUtil::surround_obs_cloud_  = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointCloudPtr  FARUtil::surround_free_cloud_ = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointCloudPtr  FARUtil::stack_new_cloud_     = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointCloudPtr  FARUtil::cur_new_cloud_       = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointCloudPtr  FARUtil::cur_dyobs_cloud_     = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointCloudPtr  FARUtil::stack_dyobs_cloud_   = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointCloudPtr  FARUtil::cur_scan_cloud_      = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointCloudPtr  FARUtil::local_terrain_obs_   = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointCloudPtr  FARUtil::local_terrain_free_  = std::make_shared<pcl::PointCloud<PCLPoint>>();
+PointKdTreePtr FARUtil::kdtree_new_cloud_    = std::make_shared<pcl::KdTreeFLANN<PCLPoint>>();
+PointKdTreePtr FARUtil::kdtree_filter_cloud_ = std::make_shared<pcl::KdTreeFLANN<PCLPoint>>();
 /* init static utility values */
 const float FARUtil::kEpsilon = 1e-7;
 const float FARUtil::kINF     = std::numeric_limits<float>::max();
